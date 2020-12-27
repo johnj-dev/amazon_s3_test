@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:amazon_s3_test/activities_buyer.dart';
 import 'package:amazon_s3_test/order_tracker.dart';
 import 'package:amazon_s3_test/performance_buyer.dart';
 import 'package:flutter/material.dart';
@@ -69,34 +70,43 @@ class _MyHomeState extends State<MyHome> {
       appBar: AppBar(
         title: Text('testing'),
       ),
-      body: Column(
-        children: [
-          file != null ? Image.file(file) : Text('File not loaded'),
-          RaisedButton(
-            child: Text('Load image'),
-            onPressed: () {
-              loadImage();
-            }
-          ),
-          RaisedButton(
-            child: Text('Order Tracker'),
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => OrderTracker()));
-            }
-          ),
-          RaisedButton(
-            child: Text('Ask a Question'),
-            onPressed: () {
-              askAQuestion();
-            }
-          ),
-          RaisedButton(
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            file != null ? Image.file(file) : Text('File not loaded'),
+            RaisedButton(
+              child: Text('Load image'),
+              onPressed: () {
+                loadImage();
+              }
+            ),
+            RaisedButton(
+              child: Text('Order Tracker'),
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => OrderTracker()));
+              }
+            ),
+            RaisedButton(
+              child: Text('Ask a Question'),
+              onPressed: () {
+                askAQuestion();
+              }
+            ),
+            RaisedButton(
               child: Text('Performance'),
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => PerformanceBuyer()));
               }
-          ),
-        ],
+            ),
+            RaisedButton(
+              child: Text('Activities'),
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => Activities()));
+              }
+            ),
+          ],
+        ),
       ),
     );
   }
