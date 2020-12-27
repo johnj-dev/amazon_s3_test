@@ -9,10 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:amazon_s3_test/policy_v3.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:amazon_s3_test/constants.dart';
 
-//this is the name given to the background fetch
-const simplePeriodicTask = "testTask";
-// flutter local notification setup
+
+
+var initRoute = '/';
+var flp;
+
 void showNotification(v, flp) async {
   var android = AndroidNotificationDetails(
       'channel id', 'channel NAME', 'CHANNEL DESCRIPTION',
@@ -23,34 +26,37 @@ void showNotification(v, flp) async {
       payload: 'VIS \n $v');
 }
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Workmanager.initialize(callbackDispatcher, isInDebugMode: true); //to true if still in testing lev turn it to false whenever you are launching the app
-  await Workmanager.registerPeriodicTask("uniqueName", simplePeriodicTask,
-      existingWorkPolicy: ExistingWorkPolicy.replace,
-      frequency: Duration(minutes: 15),//when should it check the link
-      initialDelay: Duration(seconds: 5),//duration before showing the notification
-      constraints: Constraints(
-        networkType: NetworkType.connected,
-      ));
-  runApp(MyApp());
+Future notificationSelected(String payload) async {
+  print(payload);
+  initRoute = '/Order';
+  print(initRoute);
+  //Navigator.push(key.currentContext, MaterialPageRoute(builder: (context) => OrderTracker()));
+}
+
+FlutterLocalNotificationsPlugin initNotification() {
+  FlutterLocalNotificationsPlugin flp = FlutterLocalNotificationsPlugin();
+  var android = AndroidInitializationSettings('@mipmap/ic_launcher');
+  var iOS = IOSInitializationSettings();
+  var initSetttings = InitializationSettings(android: android, iOS: iOS);
+
+  flp.initialize(initSetttings, onSelectNotification: notificationSelected);
+  return flp;
 }
 
 void callbackDispatcher() {
   Workmanager.executeTask((task, inputData) async {
 
-    FlutterLocalNotificationsPlugin flp = FlutterLocalNotificationsPlugin();
-    var android = AndroidInitializationSettings('@mipmap/ic_launcher');
-    var iOS = IOSInitializationSettings();
-    var initSetttings = InitializationSettings(android: android, iOS: iOS);
-    flp.initialize(initSetttings);
-    print(task);
-    print(inputData);
-
+    flp = initNotification();
+    // flp.initialize(initSetttings);
     showNotification('TEST THIS NOTIFICATION', flp);
 
     return Future.value(true);
   });
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(MyApp());
 }
 
 
@@ -60,10 +66,18 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+
+
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MyHome(),
+      // home: MyHome(),
+      initialRoute: initRoute,
+      routes: {
+        '/': (context) => MyHome(),
+        '/Order': (context) => OrderTracker(),
+      },
     );
   }
 }
@@ -82,6 +96,8 @@ class _MyHomeState extends State<MyHome> {
     //   file = getFile;
     // });
   }
+
+
 
   void askAQuestion() {
     showDialog(
@@ -108,9 +124,27 @@ class _MyHomeState extends State<MyHome> {
     );
   }
 
+  void initApp() async {
+    await Workmanager.initialize(callbackDispatcher, isInDebugMode: true); //to true if still in testing lev turn it to false whenever you are launching the app
+    await Workmanager.registerPeriodicTask("firstNotif", simplePeriodicTask,
+      existingWorkPolicy: ExistingWorkPolicy.replace,
+      initialDelay: Duration(seconds: 5),//duration before showing the notification
+      constraints: Constraints(
+        networkType: NetworkType.connected,
+      ));
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    initApp();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: key,
       appBar: AppBar(
         title: Text('testing'),
       ),
@@ -149,6 +183,19 @@ class _MyHomeState extends State<MyHome> {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => Activities()));
               }
             ),
+
+            RaisedButton(
+                child: Text('Show Notification'),
+                onPressed: () {
+                  // FlutterLocalNotificationsPlugin flp = FlutterLocalNotificationsPlugin();
+                  // var android = AndroidInitializationSettings('@mipmap/ic_launcher');
+                  // var iOS = IOSInitializationSettings();
+                  // var initSetttings = InitializationSettings(android: android, iOS: iOS);
+                  //
+                  // flp.initialize(initSetttings, onSelectNotification: notificationSelected);
+                  showNotification('TEST THIS NOTIFICATION', flp);
+                }
+            )
           ],
         ),
       ),
